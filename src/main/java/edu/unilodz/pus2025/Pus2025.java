@@ -15,7 +15,7 @@ public class Pus2025 {
         log.log(Level.INFO, "Connection to database {0} established", Database.getFilename(db));
         TcpServer tcpServer = new TcpServer(PORT);
         new Thread(tcpServer).start();
-        log.log(Level.SEVERE, "Server TCP was started on port {0}", PORT);
+        log.log(Level.INFO, "Server TCP was started on port {0}", PORT);
 
         CommandPrompt.run();
         System.exit(0);

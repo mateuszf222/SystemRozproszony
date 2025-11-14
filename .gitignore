@@ -17,8 +17,9 @@ Thumbs.db
 
 *.log
 
-*.sqlite3
-
 *.tmp
 *.swp
 *.bak
+
+!/data/.gitkeep
+/data/**

@@ -19,8 +19,9 @@ public class Database {
         String createCommunicationLog =
             "CREATE TABLE IF NOT EXISTS communication_log (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "time INTEGER," +
-                "processor TEXT," +
+                "timestamp INTEGER," +
+                "session TEXT," +
+                "processing_time INTEGER," +
                 "request TEXT," +
                 "response TEXT" +
             ")";
@@ -35,13 +36,14 @@ public class Database {
         return db.getMetaData().getURL();
     }
 
-    public static void communicationLog(String request, String response) throws SQLException {
-        String insertSql = "INSERT INTO communication_log(time, processor, request, response) VALUES(?, ?, ?, ?)";
+    public static void communicationLog(long time, String session, long processing_time, String request, String response) throws SQLException {
+        String insertSql = "INSERT INTO communication_log(timestamp, session, processing_time, request, response) VALUES(?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = db.prepareStatement(insertSql)) {
-            pstmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-            pstmt.setString(2, Pus2025.version);
-            pstmt.setString(3, request);
-            pstmt.setString(4, response);
+            pstmt.setLong(1, time);
+            pstmt.setString(2, session);
+            pstmt.setLong(3, processing_time);
+            pstmt.setString(4, request);
+            pstmt.setString(5, response);
             pstmt.executeUpdate();
         }
     }

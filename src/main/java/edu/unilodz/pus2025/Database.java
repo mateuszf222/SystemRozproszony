@@ -28,7 +28,6 @@ public class Database {
 
         try (Statement stmt = db.createStatement()) {
             stmt.execute(createCommunicationLog);
-            log.info("Creating table communication.log");
         }
     }
 

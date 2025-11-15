@@ -1,0 +1,4 @@
+{
+  "port": 9000,
+  "cluster": [ "localhost:9000", "localhost:9001", "localhost:9002" ]
+}

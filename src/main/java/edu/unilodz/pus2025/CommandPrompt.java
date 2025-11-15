@@ -8,8 +8,6 @@ public class CommandPrompt {
         Scanner scanner = new Scanner(System.in);
         String line;
 
-        System.out.println("Welcome to PUS2025. Enter 'exit' to quit.");
-
         boolean running = true;
         do {
             System.out.print("% ");

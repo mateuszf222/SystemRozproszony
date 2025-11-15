@@ -34,13 +34,13 @@ public class TcpClientHandler implements Runnable {
                     log.log(Level.SEVERE, "Cannot process request: {0}: {1}", new Object[]{line, ex.getMessage()});
                 }
             } while (true);
-        } catch (IOException ex) {
+        } catch (IOException ignored) {
         } finally {
             log.log(Level.INFO, "Client from {0} disconnected, session {1} terminated", new Object[]{socket.getRemoteSocketAddress(), uuid});
         }
     }
 
-    JSONObject process(String inputLine) throws SQLException {
+    JSONObject process(String inputLine) {
         JSONObject response = new JSONObject(inputLine);
         long timeStart = System.currentTimeMillis();
         // processing

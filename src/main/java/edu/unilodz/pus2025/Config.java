@@ -9,25 +9,21 @@ import java.net.InetSocketAddress;
 
 public class Config extends JSONObject {
     public int port = 9000;
-    public InetSocketAddress[] cluster = null;
+
     public Config(String fileName) throws FileNotFoundException, RuntimeException {
         super(new JSONTokener(new FileReader(fileName)));
         try { port = this.getInt("port"); } catch (Exception ignore) {}
         try {
             JSONArray cluster = this.getJSONArray("cluster");
-            this.cluster = new InetSocketAddress[cluster.length()];
             for (int i = 0; i < cluster.length(); i++) {
-                String entry = cluster.getString(i);
-
-                String[] parts = entry.split(":");
-                String host = parts[0];
-                int port = Integer.parseInt(parts[1]);
-
-                this.cluster[i] = new InetSocketAddress(host, port);
+                JSONObject jnode = cluster.getJSONObject(i);
+                String name = jnode.getString("name");
+                Node node = new Node(name, jnode.getString("address"));
+                Node.cluster.put(name, node);
             }
         } catch(Exception ignore) {
         } finally {
-            if(this.cluster == null || this.cluster.length == 0) throw new RuntimeException("cluster cannot be empty");
+            if(Node.cluster.isEmpty()) throw new RuntimeException("cluster cannot be empty");
         }
     }
 }

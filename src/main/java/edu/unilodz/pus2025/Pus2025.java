@@ -11,7 +11,7 @@ public class Pus2025 {
 
     private static String version = Pus2025.class.getSimpleName();
     private static final Log log = Log.get();
-    public static Config config;
+    private static Config config;
 
     static {
         try {
@@ -36,7 +36,7 @@ public class Pus2025 {
         String commit = gitProps.getProperty("git.commit.id.describe");
         version += '/' + branch + '@' + commit;
 
-        System.out.printf("Starting %s with config %s\n", version, config.toString());
+        log.log(Level.INFO, "Starting " + version);
 
         Database.initDb();
         log.log(Level.INFO, "Connection to database {0} established", Database.getFilename());

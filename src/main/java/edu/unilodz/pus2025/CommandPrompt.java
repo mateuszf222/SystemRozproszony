@@ -6,6 +6,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+import static edu.unilodz.pus2025.Pus2025.getConfig;
+
 public class CommandPrompt {
 
     public static void run() {
@@ -13,7 +15,7 @@ public class CommandPrompt {
             Terminal terminal = TerminalBuilder.builder().system(true).build();
             LineReader reader = LineReaderBuilder.builder().terminal(terminal).build();
 
-            String prompt = "[" + Pus2025.getConfig().getName() + "]%% ";
+            String prompt = "[" + getConfig().getName() + "]%% ";
             boolean running = true;
             do {
                 String line = reader.readLine(prompt);

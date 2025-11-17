@@ -11,8 +11,12 @@ public class TcpServer implements Runnable {
     
     private final ServerSocket serverSocket;
     
-    public TcpServer(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
+    public TcpServer(int port) {
+        try {
+            serverSocket = new ServerSocket(port);
+        } catch(IOException e) {
+            throw new RuntimeException("port " + port + " busy");
+        }
     }
     
     @Override

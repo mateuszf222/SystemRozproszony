@@ -7,7 +7,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Map;
 
-import static edu.unilodz.pus2025.Pus2025.config;
+import static edu.unilodz.pus2025.Pus2025.getConfig;
 
 public class Heartbeat implements Runnable {
     private final long period;
@@ -18,14 +18,14 @@ public class Heartbeat implements Runnable {
     public void run() {
         while (true) {
             JSONObject payload = new JSONObject();
-            payload.put("name", config.getName());
+            payload.put("name", getConfig().getName());
             long timestamp = System.currentTimeMillis();
             payload.put("timestamp", timestamp);
             byte[] payloadBinary = payload.toString().getBytes();
             for (Map.Entry<String, Node> nodeEntry: Node.getCluster().entrySet()) {
                 String name = nodeEntry.getKey();
                 Node node = nodeEntry.getValue();
-                if (!name.equals(config.getName())) {
+                if (!name.equals(getConfig().getName())) {
                     DatagramPacket packet = new DatagramPacket(
                         payloadBinary, payloadBinary.length,
                         node.getAddress()

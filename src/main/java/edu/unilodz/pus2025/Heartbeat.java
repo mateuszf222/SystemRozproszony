@@ -19,7 +19,8 @@ public class Heartbeat implements Runnable {
         while (true) {
             JSONObject payload = new JSONObject();
             payload.put("name", config.getName());
-            payload.put("timestamp", System.currentTimeMillis());
+            long timestamp = System.currentTimeMillis();
+            payload.put("timestamp", timestamp);
             byte[] payloadBinary = payload.toString().getBytes();
             for (Map.Entry<String, Node> nodeEntry: Node.getCluster().entrySet()) {
                 String name = nodeEntry.getKey();
@@ -32,6 +33,9 @@ public class Heartbeat implements Runnable {
                     try (DatagramSocket socket = new DatagramSocket()) {
                         socket.send(packet);
                     } catch(IOException ignored) {}
+                } else {
+                    node.setLastBeat(timestamp);
+                    node.setTripTime(0);
                 }
             }
             try {

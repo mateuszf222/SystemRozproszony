@@ -1,41 +1,41 @@
 package edu.unilodz.pus2025;
 
+import org.jline.reader.*;
+import org.jline.terminal.*;
 import org.json.JSONObject;
 
-import java.util.Scanner;
+import java.io.IOException;
 
 public class CommandPrompt {
 
     public static void run() {
-        Scanner scanner = new Scanner(System.in);
-        String line;
+        try {
+            Terminal terminal = TerminalBuilder.builder().system(true).build();
+            LineReader reader = LineReaderBuilder.builder().terminal(terminal).build();
 
-        boolean running = true;
-        do {
-            System.out.printf("[%s] %% ", Pus2025.getConfig().getName());
-            try {
-                line = scanner.nextLine().trim();
-            } catch (Exception e) {
-                break;
-            }
-            String[] params = line.split("\\s+");
-            String cmd = params[0].toLowerCase();
+            String prompt = "[" + Pus2025.getConfig().getName() + "]%% ";
+            boolean running = true;
+            do {
+                String line = reader.readLine(prompt);
 
-            switch (cmd) {
-                case "":
-                    break;
-                case "exit":
-                    running = false;
-                    break;
-                case "cluster":
-                    System.out.println(new JSONObject(Node.getCluster()).toString(2));
-                    break;
-                default:
-                    System.err.println("Unknown command: " + line);
-            }
-        } while(running);
+                String[] params = line.split("\\s+");
+                String cmd = params[0].toLowerCase();
 
-        scanner.close();
-        System.out.println("Bye!");
+                switch (cmd) {
+                    case "":
+                        break;
+                    case "exit":
+                        running = false;
+                        break;
+                    case "cluster":
+                        terminal.writer().println(new JSONObject(Node.getCluster()).toString(2));
+                        terminal.writer().flush();
+                        break;
+                    default:
+                        terminal.writer().println("Unknown command: " + line);
+                        terminal.writer().flush();
+                }
+            } while (running);
+        } catch(IOException | UserInterruptException | EndOfFileException ignored) {}
     }
 }

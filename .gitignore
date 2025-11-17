@@ -22,5 +22,4 @@ Thumbs.db
 *.swp
 *.bak
 
-!/data/.gitkeep
-/data/**
+/data

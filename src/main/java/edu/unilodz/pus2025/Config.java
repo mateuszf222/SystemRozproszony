@@ -20,14 +20,12 @@ public class Config extends JSONObject {
         try {
             port = this.getInt("port");
             period = this.getInt("period");
-        } catch (Exception ignore) {}
-        try {
             JSONArray cluster = this.getJSONArray("cluster");
             for (int i = 0; i < cluster.length(); i++) {
                 JSONObject jNode = cluster.getJSONObject(i);
                 new Node(jNode.getString("name"), jNode.getString("address"));
             }
-        } catch(Exception ignore) {
+        } catch(Exception ignored) {
         } finally {
             if(Node.getCluster().isEmpty()) {
                 throw new RuntimeException("cluster cannot be empty");

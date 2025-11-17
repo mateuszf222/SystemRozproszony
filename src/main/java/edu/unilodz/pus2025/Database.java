@@ -1,13 +1,29 @@
 package edu.unilodz.pus2025;
 
+import java.io.File;
 import java.sql.*;
+import java.util.logging.Level;
 
 public class Database {
 
-    private static final String DBFILENAME = "./data/pus2025.sqlite3";
+    private static final String DBFOLDER = "./data";
+    private static final String DBFILENAME = DBFOLDER + "/pus2025.sqlite3";
     private static Connection db = null;
+    private static final Log log = Log.get();
 
     public static void initDb() throws ClassNotFoundException, SQLException {
+        File folder = new File(DBFOLDER);
+        if (!folder.exists()) {
+            boolean created = folder.mkdirs();
+            if (created) {
+                log.log(Level.INFO, "Folder " + DBFOLDER + " created.");
+            } else {
+                throw new RuntimeException("cannot create folder " + DBFOLDER);
+            }
+        } else if (!folder.isDirectory()) {
+            throw new RuntimeException(DBFOLDER + " exists but it is not folder");
+        }
+
         Class.forName("org.sqlite.JDBC");
         db = DriverManager.getConnection("jdbc:sqlite:" + DBFILENAME);
         try (Statement stmt = db.createStatement()) {

@@ -1,13 +1,11 @@
 package edu.unilodz.pus2025;
 
 import java.sql.*;
-import java.util.logging.Level;
 
 public class Database {
 
-    private static final Log log = Log.get();
-    public static final String DBFILENAME = "./data/pus2025.sqlite3";
-    public static Connection db = null;
+    private static final String DBFILENAME = "./data/pus2025.sqlite3";
+    private static Connection db = null;
 
     public static void initDb() throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");

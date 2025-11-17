@@ -9,7 +9,8 @@ import java.util.logging.Level;
 
 public class Pus2025 {
 
-    public static String version = Pus2025.class.getSimpleName();
+    private static String version = Pus2025.class.getSimpleName();
+    private static final Log log = Log.get();
     public static Config config;
 
     static {
@@ -25,8 +26,7 @@ public class Pus2025 {
     }
 
     private static final int PORT = config.port;
-    private static final Log log = Log.get();
-    
+
     public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException {
         Properties gitProps = new Properties();
         try (InputStream in = Pus2025.class.getResourceAsStream("/git.properties")) {
@@ -46,7 +46,12 @@ public class Pus2025 {
         UdpServer udpServer = new UdpServer(PORT);
         new Thread(udpServer).start();
         log.log(Level.INFO, "Server UDP started on port {0}", PORT);
+        new Thread(new Heartbeat(config.period)).start();
         CommandPrompt.run();
         System.exit(0);
+    }
+
+    public static Config getConfig() {
+        return config;
     }
 }

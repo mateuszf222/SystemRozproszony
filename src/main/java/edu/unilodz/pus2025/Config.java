@@ -5,29 +5,37 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.net.InetSocketAddress;
 
 public class Config extends JSONObject {
+    private final String name;
     public int port = 9000;
-    public InetSocketAddress[] cluster = null;
+    public long period = 60000;
     public Config(String fileName) throws FileNotFoundException, RuntimeException {
         super(new JSONTokener(new FileReader(fileName)));
-        try { port = this.getInt("port"); } catch (Exception ignore) {}
+        try {
+            name = this.getString("name");
+        } catch (Exception e) {
+            throw new RuntimeException("no name in config");
+        }
+        try {
+            port = this.getInt("port");
+            period = this.getInt("period");
+        } catch (Exception ignore) {}
         try {
             JSONArray cluster = this.getJSONArray("cluster");
-            this.cluster = new InetSocketAddress[cluster.length()];
             for (int i = 0; i < cluster.length(); i++) {
-                String entry = cluster.getString(i);
-
-                String[] parts = entry.split(":");
-                String host = parts[0];
-                int port = Integer.parseInt(parts[1]);
-
-                this.cluster[i] = new InetSocketAddress(host, port);
+                JSONObject jNode = cluster.getJSONObject(i);
+                new Node(jNode.getString("name"), jNode.getString("address"));
             }
         } catch(Exception ignore) {
         } finally {
-            if(this.cluster == null || this.cluster.length == 0) throw new RuntimeException("cluster cannot be empty");
+            if(Node.getCluster().isEmpty()) {
+                throw new RuntimeException("cluster cannot be empty");
+            }
         }
+    }
+
+    public String getName() {
+        return name;
     }
 }

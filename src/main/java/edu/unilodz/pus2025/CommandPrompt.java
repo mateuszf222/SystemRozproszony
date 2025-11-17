@@ -1,5 +1,7 @@
 package edu.unilodz.pus2025;
 
+import org.json.JSONObject;
+
 import java.util.Scanner;
 
 public class CommandPrompt {
@@ -10,8 +12,12 @@ public class CommandPrompt {
 
         boolean running = true;
         do {
-            System.out.print("% ");
-            line = scanner.nextLine().trim();
+            System.out.printf("[%s] %% ", Pus2025.getConfig().getName());
+            try {
+                line = scanner.nextLine().trim();
+            } catch (Exception e) {
+                break;
+            }
             String[] params = line.split("\\s+");
             String cmd = params[0].toLowerCase();
 
@@ -21,11 +27,11 @@ public class CommandPrompt {
                 case "exit":
                     running = false;
                     break;
-                case "hello":
-                    System.out.println("Hello!");
+                case "cluster":
+                    System.out.println(new JSONObject(Node.getCluster()).toString(2));
                     break;
                 default:
-                    System.out.println("Unknown command: " + line);
+                    System.err.println("Unknown command: " + line);
             }
         } while(running);
 

@@ -9,6 +9,7 @@ import java.io.FileReader;
 public class Config extends JSONObject {
     private final String name;
     public int port = 9000;
+    public int httpport = 8000;
     public long period = 60000;
     public Config(String fileName) throws FileNotFoundException, RuntimeException {
         super(new JSONTokener(new FileReader(fileName)));
@@ -19,6 +20,7 @@ public class Config extends JSONObject {
         }
         try {
             port = this.getInt("port");
+            httpport = this.getInt("httpport");
             period = this.getInt("period");
             JSONArray cluster = this.getJSONArray("cluster");
             for (int i = 0; i < cluster.length(); i++) {

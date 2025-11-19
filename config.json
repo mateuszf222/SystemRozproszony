@@ -1,6 +1,7 @@
 {
   "name": "node-0",
   "port": 9000,
+  "httpport": 8000,
   "period": 10000,
   "cluster": [
     {

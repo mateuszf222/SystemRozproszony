@@ -11,7 +11,7 @@ public class HttpServer implements Runnable {
         this.port = port;
     }
 
-    private static void handleApi(Context ctx) {
+    private static void handlePostApi(Context ctx) {
         JSONObject req, res;
 
         try {
@@ -28,14 +28,13 @@ public class HttpServer implements Runnable {
         }
 
         String cmd = req.getString("cmd");
+        res = new JSONObject();
         switch(cmd) {
             case "cluster":
-                res = new JSONObject(Node.getCluster());
+                res.put("result", new JSONObject(Node.getCluster()));
                 break;
             default:
-                res = new JSONObject()
-                    .put("error", "Unknown cmd")
-                    .put("message", "Cannot perform " + cmd);
+                res.put("error", "Unknown cmd").put("message", "Cannot perform " + cmd);
                 ctx.status(400);
         }
 
@@ -47,9 +46,9 @@ public class HttpServer implements Runnable {
 
     @Override
     public void run() {
-        Javalin app = Javalin.create(config -> config.staticFiles.add("/frontend"));
+        Javalin app = Javalin.create(config -> config.staticFiles.add("/frontend/browser"));
 
-        app.post("/api", HttpServer::handleApi);
+        app.post("/api", HttpServer::handlePostApi);
         app.start(port);
     }
 }

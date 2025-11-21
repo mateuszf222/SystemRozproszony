@@ -1,0 +1,31 @@
+<form [formGroup]="form" (ngSubmit)="onPerform()">
+  <div class="mat-dialog-title">Perform command on <em>{{ data.row.node }}</em></div>
+  <div class="mat-dialog-content">
+
+    <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Command</mat-label>
+        <input matInput formControlName="cmd" placeholder="command" required/>
+        @if(form.get('cmd')?.invalid) {
+            <mat-error>Command is required</mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Arguments</mat-label>
+        <input matInput formControlName="args" placeholder="..."/>
+        @if(form.get('args')?.invalid) {
+            <mat-error>Error in arguments</mat-error>
+        }
+    </mat-form-field>
+    
+    <mat-form-field appearance="fill" class="w-full">
+    <mat-label>Motto</mat-label>
+        <textarea matInput [value]="response" readonly rows="5" class="response" placeholder="..."></textarea>
+    </mat-form-field>
+
+  </div>
+  <div mat-dialog-actions>
+    <button type="button" mat-stroked-button mat-dialog-close>Close</button>
+    <button mat-raised-button type="submit" color="primary" [disabled]="form.invalid">Perform</button>
+  </div>
+</form>

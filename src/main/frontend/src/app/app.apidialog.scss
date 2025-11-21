@@ -1,0 +1,13 @@
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.response {
+    overflow-y: auto;
+}

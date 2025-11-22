@@ -60,9 +60,9 @@ public class Pus2025 {
         new Thread(udpServer).start();
         log.log(Level.INFO, "Server UDP started on port {0}", PORT);
         new Thread(new Heartbeat(config.period)).start();
-        new Thread(new HttpServer(HTTPPORT)).start();
+        new HttpServer(HTTPPORT).start();
         log.log(Level.INFO, "Server HTTP started on port {0}", HTTPPORT);
-        CommandPrompt.run();
+        CommandPrompt.start();
         System.exit(0);
     }
 

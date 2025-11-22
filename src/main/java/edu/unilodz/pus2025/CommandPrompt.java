@@ -10,10 +10,11 @@ import static edu.unilodz.pus2025.Pus2025.getConfig;
 
 public class CommandPrompt {
 
-    public static void run() {
+    public static void start() {
         try {
             Terminal terminal = TerminalBuilder.builder().system(true).build();
-            LineReader reader = LineReaderBuilder.builder().terminal(terminal).build();
+            LineReader reader = LineReaderBuilder.
+                    builder().terminal(terminal).build();
 
             String prompt = "[" + getConfig().getName() + "]%% ";
             boolean running = true;

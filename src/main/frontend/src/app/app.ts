@@ -25,6 +25,11 @@ export class App {
   constructor(private appService: AppService, private dialog: MatDialog) {}
 
   ngOnInit() {
+    this.appService.connect();
+    this.appService.onMessage().subscribe(msg => {
+      console.log(msg);
+    });
+
     this.sub = this.appService.poll(5000).subscribe((clusterResponse) => {
       if(clusterResponse?.result) {
         this.cluster = Object.entries(clusterResponse.result).map(([node, info]) => ({ node, ...(info as any) }));

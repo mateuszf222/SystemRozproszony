@@ -17,8 +17,6 @@ public class TcpClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            log.log(Level.INFO, "New session {0} for {1}", new Object[]{ uuid, socket.getRemoteSocketAddress() });
-
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 
@@ -35,8 +33,6 @@ public class TcpClientHandler implements Runnable {
                 }
             } while (true);
         } catch (IOException ignored) {
-        } finally {
-            log.log(Level.INFO, "Client from {0} disconnected, session {1} terminated", new Object[]{socket.getRemoteSocketAddress(), uuid});
         }
     }
 }

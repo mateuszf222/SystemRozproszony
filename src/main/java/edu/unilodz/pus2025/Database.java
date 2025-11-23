@@ -107,7 +107,7 @@ public class Database {
                     obj.put("args", rs.getString("args"));
                     obj.put("execution_time", rs.getLong("execution_time"));
                     obj.put("code", rs.getLong("code"));
-                    obj.put("description", rs.getLong("description"));
+                    obj.put("description", rs.getString("description"));
                     arr.put(obj);
                 }
             }

@@ -6,7 +6,7 @@ import { Observable, Subject, switchMap, timer } from "rxjs";
 export class AppService {
   private ws?: WebSocket;
   private messages$ = new Subject<string>();
-  
+
   constructor(private http: HttpClient) {}
 
   poll(intervalMs: number): Observable<any> {
@@ -26,22 +26,14 @@ export class AppService {
   connect(): void {
     this.ws = new WebSocket('/ws');
 
-    this.ws.onopen = () => {
-      console.log('WebSocket connected');
-    };
-
+    this.ws.onopen = () => {};
     this.ws.onmessage = event => {
       this.messages$.next(event.data);
     };
-
-    this.ws.onclose = () => {
-      console.log('WebSocket disconnected, trying to reconnect');
-      this.connect();
-    };
-
+    this.ws.onclose = () => { this.connect(); };
     this.ws.onerror = err => {
       console.error('WebSocket error, trying to reconnect', err);
-      this.ws?.close();    
+      this.ws?.close();
     };
   }
 

@@ -8,6 +8,8 @@ mvn clean install -DskipTests
 
 ## Uruchomienie
 
+Konfiguracja w `config.json`
+
 Windows
 ```bash
 run

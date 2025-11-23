@@ -4,7 +4,8 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import static edu.unilodz.pus2025.Pus2025.getHttpServer;
+import static edu.unilodz.pus2025.Main.forceHeartbeat;
+import static edu.unilodz.pus2025.Main.getHttpServer;
 
 public class Node {
     private static final Map<String, Node> cluster = new HashMap<>();
@@ -53,10 +54,12 @@ public class Node {
     public synchronized void incTasks() {
         tasks++;
         getHttpServer().clusterBroadcast();
+        forceHeartbeat();
     }
 
     public synchronized void decTasks() {
         tasks--;
         getHttpServer().clusterBroadcast();
+        forceHeartbeat();
     }
 }

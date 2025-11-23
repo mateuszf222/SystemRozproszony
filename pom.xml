@@ -13,7 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>8</maven.compiler.release>
-        <exec.mainClass>edu.unilodz.pus2025.Pus2025</exec.mainClass>
+        <exec.mainClass>edu.unilodz.pus2025.Main</exec.mainClass>
     </properties>
 
     <dependencies>

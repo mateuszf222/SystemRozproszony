@@ -104,7 +104,7 @@ public class Database {
                     obj.put("id", rs.getInt("id"));
                     obj.put("timestamp", rs.getLong("timestamp"));
                     obj.put("cmd", rs.getString("cmd"));
-                    obj.put("args", rs.getString("args"));
+                    obj.put("args", new JSONObject(rs.getString("args")));
                     obj.put("execution_time", rs.getLong("execution_time"));
                     obj.put("code", rs.getLong("code"));
                     obj.put("description", rs.getString("description"));

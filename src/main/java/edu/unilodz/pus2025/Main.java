@@ -10,17 +10,19 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Pus2025 {
+public class Main {
 
-    private static String version = Pus2025.class.getSimpleName();
+    private static String version = Main.class.getSimpleName();
     private static final Log log = Log.get();
     private static Config config;
     private static Thread heartbeatThread;
     private static HttpServer httpServer;
+    private static Node currentNode;
 
     static {
         try {
             config = new Config("config.json");
+            currentNode = Node.getCluster().get(getConfig().getName());
         } catch (FileNotFoundException e) {
             System.err.println("No config file, exiting");
             System.exit(1);
@@ -44,7 +46,7 @@ public class Pus2025 {
         System.setProperty("org.slf4j.simpleLogger.dateTimeFormat", "HH:mm:ss");
 
         Properties gitProps = new Properties();
-        try (InputStream in = Pus2025.class.getResourceAsStream("/git.properties")) {
+        try (InputStream in = Main.class.getResourceAsStream("/git.properties")) {
             gitProps.load(in);
         }
         String branch = gitProps.getProperty("git.branch");
@@ -81,4 +83,6 @@ public class Pus2025 {
     public static HttpServer getHttpServer() {
         return httpServer;
     }
+
+    public static Node getCurrentNode() { return currentNode; }
 }

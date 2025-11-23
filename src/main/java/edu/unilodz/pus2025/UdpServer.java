@@ -8,7 +8,8 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.logging.Level;
 
-import static edu.unilodz.pus2025.Pus2025.getHttpServer;
+import static edu.unilodz.pus2025.Main.getCurrentNode;
+import static edu.unilodz.pus2025.Main.getHttpServer;
 
 public class UdpServer implements Runnable {
     private static final Log log = Log.get();
@@ -26,14 +27,12 @@ public class UdpServer implements Runnable {
             try {
                 socket.receive(packet);
                 JSONObject payload = new JSONObject(new String(packet.getData(), 0, packet.getLength()));
-                Node node = Node.getCluster().get(payload.getString("name"));
-                if(node != null) {
-                    long timestamp = System.currentTimeMillis();
-                    node.setLastBeat(timestamp);
-                    node.setTripTime(timestamp - payload.getLong("timestamp"));
-                    node.setTasks(payload.getInt("tasks"));
-                    getHttpServer().clusterBroadcast();
-                }
+                Node node = getCurrentNode();
+                long timestamp = System.currentTimeMillis();
+                node.setLastBeat(timestamp);
+                node.setTripTime(timestamp - payload.getLong("timestamp"));
+                node.setTasks(payload.getInt("tasks"));
+                getHttpServer().clusterBroadcast();
             } catch (IOException e) {
                 log.log(Level.SEVERE, "Error receiving a packet: {0}", e.getMessage());
             }

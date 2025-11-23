@@ -3,12 +3,14 @@ package edu.unilodz.pus2025;
 import org.jline.reader.*;
 import org.jline.terminal.*;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static edu.unilodz.pus2025.Pus2025.getConfig;
+import static edu.unilodz.pus2025.Main.getConfig;
+import static edu.unilodz.pus2025.Main.getCurrentNode;
 
 public class CommandPrompt {
 
@@ -46,6 +48,27 @@ public class CommandPrompt {
                             JSONArray lastExecutions = Database.getLastExecutions(limit);
                             terminal.writer().println(lastExecutions.toString(2));
                             terminal.writer().flush();
+                        }
+                    case "exec": {
+                            if(params.length > 2) {
+                                String xCmd = params[1];
+                                JSONObject payload = new JSONObject();
+                                String argsStr = line.replaceFirst("^\\S+\\s+\\S+\\s+", "");
+                                try {
+                                    JSONObject args = new JSONObject(argsStr);
+                                    payload.put("args", args);
+                                } catch(JSONException e) {
+                                    terminal.writer().println("Arguments have to be a proper JSON");
+                                    terminal.writer().flush();
+                                    break;
+                                }
+                                payload.put("node", getCurrentNode());
+                                payload.put("cmd", xCmd);
+                                new Thread(new Executor(getCurrentNode(), payload)).start();
+                            } else {
+                                terminal.writer().println("Use exec cmd arg_json");
+                                terminal.writer().flush();
+                            }
                         }
                         break;
                     default:

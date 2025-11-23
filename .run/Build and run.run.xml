@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Build and run" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="edu.unilodz.pus2025.Pus2025" />
+    <option name="MAIN_CLASS_NAME" value="edu.unilodz.pus2025.Main" />
     <module name="pus2025" />
     <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED" />
     <method v="2">

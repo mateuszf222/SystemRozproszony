@@ -14,7 +14,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-import static edu.unilodz.pus2025.Pus2025.getConfig;
+import static edu.unilodz.pus2025.Main.getConfig;
+import static edu.unilodz.pus2025.Main.getCurrentNode;
 
 public class HttpServer {
     private static final Log log = Log.get();
@@ -64,13 +65,19 @@ public class HttpServer {
             if(cmd != null && !cmd.isEmpty()) {
                 String node = req.getString("node");
                 String whoami = getConfig().getString("name");
+                try {
+                    req.getJSONObject("args");
+                } catch(JSONException e) {
+                    req.put("args", new JSONObject());
+                }
                 if (whoami.equals(node)) {
                     result.put("node", whoami);
                     result.put("queued", true);
                     res.put("result", result);
-                    new Thread(new Executor(Node.getCluster().get(whoami), req)).start();
+                    new Thread(new Executor(getCurrentNode(), req)).start();
                 } else {
                     Node target = Node.getCluster().get(node);
+                    if(target == null) throw new JSONException("No such target node");
                     try (Socket targetSocket = new Socket()) {
                         targetSocket.connect(target.getAddress());
                         PrintWriter targetOutput = new PrintWriter(targetSocket.getOutputStream());
@@ -87,7 +94,7 @@ public class HttpServer {
             }
         }
         catch(Exception e) {
-            res.put("error", "Processing error").put("message", "Cannot process " + body);
+            res.put("error", "Processing error").put("message", "Cannot process " + body + ": " + e.getMessage());
             ctx.status(400);
         }
 
@@ -108,9 +115,7 @@ public class HttpServer {
             ws.onConnect(clients::add);
             ws.onMessage(ctx -> {});
             ws.onClose(clients::remove);
-            ws.onError(ctx -> {
-                log.log(Level.SEVERE, "Websocket error: {0}", ctx.error() != null ? ctx.error().getMessage() : "Unknown error");
-            });
+            ws.onError(ctx -> {});
         });
     }
 }

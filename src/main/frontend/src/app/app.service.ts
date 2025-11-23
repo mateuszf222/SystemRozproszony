@@ -33,7 +33,7 @@ export class AppService {
     this.ws.onclose = () => { this.connect(); };
     this.ws.onerror = err => {
       console.error('WebSocket error, trying to reconnect', err);
-      this.ws?.close();
+      this.connect();
     };
   }
 

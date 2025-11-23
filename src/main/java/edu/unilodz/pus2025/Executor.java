@@ -18,31 +18,34 @@ public class Executor implements Runnable {
     @Override
     public void run() {
         node.incTasks();
-        String cmd = task.getString("cmd");
-        JSONObject args = task.getJSONObject("args");
-        String argsStr = args.toString();
-        int code = -1;
-        String description = "no cmd in task";
-        long executionTime = System.currentTimeMillis();
-        switch(cmd) {
-            case "sleep": {
+        try {
+            String cmd = task.getString("cmd");
+            JSONObject args = task.getJSONObject("args");
+            String argsStr = args.toString();
+            int code = -1;
+            String description = "no cmd in task";
+            long executionTime = System.currentTimeMillis();
+            switch (cmd) {
+                case "sleep": {
                     long ms = args.getLong("ms");
                     try {
                         Thread.sleep(ms);
-                    } catch (InterruptedException ignored) {}
+                    } catch (InterruptedException ignored) {
+                    }
                 }
                 code = 0;
                 break;
-            default:
-                log.log(Level.SEVERE, "Cannot execute the task {0}", task);
-                code = -2;
-                description = "unknown cmd " + cmd;
-        }
-        executionTime = System.currentTimeMillis() - executionTime;
-        try {
-            Database.executionLog(cmd, argsStr, executionTime, code, code != 0 ? description : "ok");
-        } catch(SQLException ignore) {
-            System.out.println(ignore.getMessage());
+                default:
+                    log.log(Level.SEVERE, "Cannot execute the task {0}", task);
+                    code = -2;
+                    description = "unknown cmd " + cmd;
+            }
+            executionTime = System.currentTimeMillis() - executionTime;
+            try {
+                Database.executionLog(cmd, argsStr, executionTime, code, code != 0 ? description : "ok");
+            } catch (SQLException ignore) {}
+        } catch(Exception e) {
+            log.log(Level.SEVERE, "Error during execution {0}: {1}", new Object[]{task, e.getMessage()});
         }
         node.decTasks();
     }

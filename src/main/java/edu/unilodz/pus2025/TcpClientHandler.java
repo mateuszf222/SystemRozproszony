@@ -27,8 +27,8 @@ public class TcpClientHandler implements Runnable {
                 line = in.readLine();
                 if (line == null) break;
                 try {
-                    JSONObject response = process(line.trim());
-                    out.println(response.toString());
+                    JSONObject response = Executor.process(uuid, line.trim());
+                    out.println(response);
                     out.flush();
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, "Cannot process request: {0}: {1}", new Object[]{line, ex.getMessage()});
@@ -38,24 +38,5 @@ public class TcpClientHandler implements Runnable {
         } finally {
             log.log(Level.INFO, "Client from {0} disconnected, session {1} terminated", new Object[]{socket.getRemoteSocketAddress(), uuid});
         }
-    }
-
-    JSONObject process(String inputLine) {
-        JSONObject response = new JSONObject(inputLine);
-        long timeStart = System.currentTimeMillis();
-        // processing
-
-        // end of processing
-        long processingTime = System.currentTimeMillis() - timeStart;
-        JSONObject processed = new JSONObject();
-        processed.put("session", uuid);
-        processed.put("processing_time", processingTime);
-        response.put("processed", processed);
-        try {
-            Database.communicationLog(timeStart, uuid, processingTime, inputLine, response.toString());
-        } catch(SQLException ex) {
-            log.log(Level.SEVERE, "Error while logging communication: {0}", ex.getMessage());
-        }
-        return response;
     }
 }

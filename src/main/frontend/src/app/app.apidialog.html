@@ -12,9 +12,9 @@
 
     <mat-form-field appearance="outline" class="w-full">
         <mat-label>Arguments</mat-label>
-        <input matInput formControlName="args" placeholder="..."/>
+        <input matInput formControlName="args" placeholder="..." required/>
         @if(form.get('args')?.invalid) {
-            <mat-error>Error in arguments</mat-error>
+            <mat-error>Arguments have to be a valid JSON</mat-error>
         }
     </mat-form-field>
     

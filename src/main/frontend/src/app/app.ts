@@ -19,23 +19,27 @@ export class App {
   protected title = 'PUS2025';
 
   cluster: any[] = [];
-  displayedColumns = ['node', 'address', 'lastBeat', 'tripTime'];
+  displayedColumns = ['node', 'address', 'tasks', 'lastBeat', 'tripTime'];
   sub?: Subscription;
   
   constructor(private appService: AppService, private dialog: MatDialog) {}
 
-  ngOnInit() {
-    this.appService.connect();
-    this.appService.onMessage().subscribe(msg => {
-      console.log(msg);
-    });
-
-    this.sub = this.appService.poll(5000).subscribe((clusterResponse) => {
-      if(clusterResponse?.result) {
-        this.cluster = Object.entries(clusterResponse.result).map(([node, info]) => ({ node, ...(info as any) }));
+  setCluster(cluster: Object) {
+      if(cluster) {
+        this.cluster = Object.entries(cluster).map(([node, info]) => ({ node, ...(info as any) }));
       } else {
         this.cluster = [];
       }
+  }
+
+  ngOnInit() {
+    this.appService.connect();
+    this.appService.onMessage().subscribe(msg => {
+      const cluster = JSON.parse(msg);
+      this.setCluster(cluster);
+    });
+    this.sub = this.appService.poll(5000).subscribe((cluster) => {
+      this.setCluster(cluster);
     });
   }
 

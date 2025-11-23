@@ -8,6 +8,8 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.logging.Level;
 
+import static edu.unilodz.pus2025.Pus2025.getHttpServer;
+
 public class UdpServer implements Runnable {
     private static final Log log = Log.get();
     private final DatagramSocket socket;
@@ -29,6 +31,8 @@ public class UdpServer implements Runnable {
                     long timestamp = System.currentTimeMillis();
                     node.setLastBeat(timestamp);
                     node.setTripTime(timestamp - payload.getLong("timestamp"));
+                    node.setTasks(payload.getInt("tasks"));
+                    getHttpServer().clusterBroadcast();
                 }
             } catch (IOException e) {
                 log.log(Level.SEVERE, "Error receiving a packet: {0}", e.getMessage());

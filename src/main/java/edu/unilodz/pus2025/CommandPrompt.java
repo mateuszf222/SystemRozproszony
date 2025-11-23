@@ -2,9 +2,11 @@ package edu.unilodz.pus2025;
 
 import org.jline.reader.*;
 import org.jline.terminal.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import static edu.unilodz.pus2025.Pus2025.getConfig;
 
@@ -34,11 +36,23 @@ public class CommandPrompt {
                         terminal.writer().println(new JSONObject(Node.getCluster()).toString(2));
                         terminal.writer().flush();
                         break;
+                    case "log": {
+                            int limit = 1;
+                            if(params.length > 1) {
+                                try {
+                                    limit = Integer.parseInt(params[1]);
+                                } catch(NumberFormatException ignored) {}
+                            }
+                            JSONArray lastExecutions = Database.getLastExecutions(limit);
+                            terminal.writer().println(lastExecutions.toString(2));
+                            terminal.writer().flush();
+                        }
+                        break;
                     default:
                         terminal.writer().println("Unknown command: " + line);
                         terminal.writer().flush();
                 }
             } while (running);
-        } catch(IOException | UserInterruptException | EndOfFileException ignored) {}
+        } catch(IOException | UserInterruptException | EndOfFileException | SQLException ignored) {}
     }
 }

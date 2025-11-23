@@ -10,20 +10,21 @@ export class AppService {
   constructor(private http: HttpClient) {}
 
   poll(intervalMs: number): Observable<any> {
-    const request = { cmd: 'cluster' };
     return timer(0, intervalMs).pipe(
-      switchMap(() => this.http.post('/api', request))
+      switchMap(() => this.http.get('/api'))
     );
   }
 
   perform(row: any, request: any) {
-    request.node = row.node;
+    try {
+      request.args = JSON.parse(request.args);
+      request.node = row.node;
+    } catch(ex) {}
     return this.http.post('/api', request);
   }
 
   connect(): void {
     this.ws = new WebSocket('/ws');
-    console.log('Connect');
 
     this.ws.onopen = () => {
       console.log('WebSocket connected');
@@ -34,11 +35,13 @@ export class AppService {
     };
 
     this.ws.onclose = () => {
-      console.log('WebSocket disconnected');
+      console.log('WebSocket disconnected, trying to reconnect');
+      this.connect();
     };
 
     this.ws.onerror = err => {
-      console.error('WebSocket error', err);
+      console.error('WebSocket error, trying to reconnect', err);
+      this.ws?.close();    
     };
   }
 

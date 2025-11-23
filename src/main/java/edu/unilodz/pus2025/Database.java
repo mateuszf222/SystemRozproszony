@@ -1,5 +1,8 @@
 package edu.unilodz.pus2025;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.sql.*;
 import java.util.logging.Level;
@@ -43,6 +46,21 @@ public class Database {
         try (Statement stmt = db.createStatement()) {
             stmt.execute(createCommunicationLog);
         }
+
+        String createExecutionLog =
+                "CREATE TABLE IF NOT EXISTS execution_log (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "timestamp INTEGER," +
+                        "cmd TEXT," +
+                        "args TEXT," +
+                        "execution_time INTEGER," +
+                        "code INTEGER," +
+                        "description TEXT" +
+                        ")";
+
+        try (Statement stmt = db.createStatement()) {
+            stmt.execute(createExecutionLog);
+        }
     }
 
     public static String getFilename() throws SQLException {
@@ -59,5 +77,41 @@ public class Database {
             pstmt.setString(5, response);
             pstmt.executeUpdate();
         }
+    }
+
+    public static void executionLog(String cmd, String args, long execution_time, int code, String description) throws SQLException {
+        String insertSql = "INSERT INTO execution_log(timestamp, cmd, args, execution_time, code, description) VALUES(?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pstmt = db.prepareStatement(insertSql)) {
+            pstmt.setLong(1, System.currentTimeMillis());
+            pstmt.setString(2, cmd);
+            pstmt.setString(3, args);
+            pstmt.setLong(4, execution_time);
+            pstmt.setInt(5, code);
+            pstmt.setString(6, description);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public static JSONArray getLastExecutions(int limit) throws SQLException {
+        JSONArray arr = new JSONArray();
+        String selectSql = "SELECT * FROM execution_log ORDER BY timestamp DESC LIMIT ?";
+        try (PreparedStatement pstmt = db.prepareStatement(selectSql)) {
+            pstmt.setInt(1, limit);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    JSONObject obj = new JSONObject();
+                    obj.put("id", rs.getInt("id"));
+                    obj.put("timestamp", rs.getLong("timestamp"));
+                    obj.put("cmd", rs.getString("cmd"));
+                    obj.put("args", rs.getString("args"));
+                    obj.put("execution_time", rs.getLong("execution_time"));
+                    obj.put("code", rs.getLong("code"));
+                    obj.put("description", rs.getLong("description"));
+                    arr.put(obj);
+                }
+            }
+        }
+        return arr;
     }
 }

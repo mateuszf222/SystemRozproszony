@@ -15,6 +15,8 @@ public class Pus2025 {
     private static String version = Pus2025.class.getSimpleName();
     private static final Log log = Log.get();
     private static Config config;
+    private static Thread heartbeatThread;
+    private static HttpServer httpServer;
 
     static {
         try {
@@ -59,8 +61,10 @@ public class Pus2025 {
         UdpServer udpServer = new UdpServer(PORT);
         new Thread(udpServer).start();
         log.log(Level.INFO, "Server UDP started on port {0}", PORT);
-        new Thread(new Heartbeat(config.period)).start();
-        new HttpServer(HTTPPORT).start();
+        heartbeatThread = new Thread(new Heartbeat(config.period));
+        heartbeatThread.start();
+        httpServer = new HttpServer(HTTPPORT);
+        httpServer.start();
         log.log(Level.INFO, "Server HTTP started on port {0}", HTTPPORT);
         CommandPrompt.start();
         System.exit(0);
@@ -68,5 +72,13 @@ public class Pus2025 {
 
     public static Config getConfig() {
         return config;
+    }
+
+    public static void forceHeartbeat() {
+        heartbeatThread.interrupt();
+    }
+
+    public static HttpServer getHttpServer() {
+        return httpServer;
     }
 }

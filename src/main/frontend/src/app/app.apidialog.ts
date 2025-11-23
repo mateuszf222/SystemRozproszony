@@ -1,10 +1,21 @@
 import { Component, Inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AppService } from './app.service';
+
+export function jsonValidator(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) return null;
+
+  try {
+    JSON.parse(control.value);
+    return null;
+  } catch {
+    return { invalidJson: true };
+  }
+}
 
 @Component({
   selector: 'apidialog',
@@ -26,8 +37,8 @@ export class ApiDialog {
         @Inject(MAT_DIALOG_DATA) public data: { row: any }
     ) {
       this.form = this.fb.group({
-        cmd: ['', Validators.required],
-        args: ['']
+        cmd: ['sleep', Validators.required],
+        args: ['{"ms":10000}', jsonValidator]
       });
     }
 

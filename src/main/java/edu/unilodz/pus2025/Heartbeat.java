@@ -18,14 +18,16 @@ public class Heartbeat implements Runnable {
     public void run() {
         while (true) {
             JSONObject payload = new JSONObject();
-            payload.put("name", getConfig().getName());
+            String myName = getConfig().getName();
+            payload.put("name", myName);
             long timestamp = System.currentTimeMillis();
             payload.put("timestamp", timestamp);
+            payload.put("tasks", Node.getCluster().get(myName).getTasks());
             byte[] payloadBinary = payload.toString().getBytes();
             for (Map.Entry<String, Node> nodeEntry: Node.getCluster().entrySet()) {
                 String name = nodeEntry.getKey();
                 Node node = nodeEntry.getValue();
-                if (!name.equals(getConfig().getName())) {
+                if (!name.equals(myName)) {
                     DatagramPacket packet = new DatagramPacket(
                         payloadBinary, payloadBinary.length,
                         node.getAddress()

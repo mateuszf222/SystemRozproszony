@@ -24,7 +24,6 @@ public class TcpServer implements Runnable {
         do {
             try {
                 Socket clientSocket = serverSocket.accept();
-                log.log(Level.INFO, "Creating client socket {0}", clientSocket.getRemoteSocketAddress());
                 new Thread(new TcpClientHandler(clientSocket)).start();
             } catch (Exception ex) {
                 log.log(Level.SEVERE, "Creating client socket failed: {0}", ex.getMessage());

@@ -1,5 +1,6 @@
 package edu.unilodz.pus2025;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -27,13 +28,13 @@ public class UdpServer implements Runnable {
             try {
                 socket.receive(packet);
                 JSONObject payload = new JSONObject(new String(packet.getData(), 0, packet.getLength()));
-                Node node = getCurrentNode();
+                Node node = Node.getNode(payload.getString("name"));
                 long timestamp = System.currentTimeMillis();
                 node.setLastBeat(timestamp);
                 node.setTripTime(timestamp - payload.getLong("timestamp"));
                 node.setTasks(payload.getInt("tasks"));
                 getHttpServer().clusterBroadcast();
-            } catch (IOException e) {
+            } catch (IOException | JSONException | NullPointerException e) {
                 log.log(Level.SEVERE, "Error receiving a packet: {0}", e.getMessage());
             }
           }

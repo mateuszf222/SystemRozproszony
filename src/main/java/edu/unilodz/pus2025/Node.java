@@ -62,4 +62,8 @@ public class Node {
         getHttpServer().clusterBroadcast();
         forceHeartbeat();
     }
+
+    public static Node getNode(String name) {
+        return cluster.get(name);
+    }
 }

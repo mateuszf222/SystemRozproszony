@@ -21,12 +21,12 @@ export class App {
   cluster: any[] = [];
   displayedColumns = ['node', 'address', 'tasks', 'lastBeat', 'tripTime'];
   sub?: Subscription;
-  
+
   constructor(private appService: AppService, private dialog: MatDialog) {}
 
   setCluster(cluster: Object) {
       if(cluster) {
-        this.cluster = Object.entries(cluster).map(([node, info]) => ({ node, ...(info as any) }));
+        this.cluster = Object.entries(cluster).map(([node, info]) => ({ node, ...(info as any) })).sort((a, b) => a.node.localeCompare(b.node));
       } else {
         this.cluster = [];
       }

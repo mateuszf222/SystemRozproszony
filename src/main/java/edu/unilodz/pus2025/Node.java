@@ -1,26 +1,29 @@
 package edu.unilodz.pus2025;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 
-import static edu.unilodz.pus2025.Main.forceHeartbeat;
-import static edu.unilodz.pus2025.Main.getHttpServer;
+import static edu.unilodz.pus2025.Main.*;
 
 public class Node {
-    private static final Map<String, Node> cluster = new HashMap<>();
-    private final InetSocketAddress address;
+    private static final Map<String, Node> cluster = new TreeMap<>();
+    public final InetSocketAddress address;
     private long lastBeat = 0;
     private long tripTime = 0;
     private int tasks = 0;
+    private boolean me = false;
     public Node(String name, String address) {
         String[] parts = address.split(":");
+        if(parts.length != 2) {
+            throw new RuntimeException("wrong node address");
+        }
         this.address = new InetSocketAddress(parts[0], Integer.parseInt(parts[1]));
         cluster.put(name, this);
     }
 
-    public InetSocketAddress getAddress() {
-        return address;
+    public String getAddress() {
+        return address.getHostString() + ":" + address.getPort();
     }
 
     public long getLastBeat() {
@@ -37,6 +40,14 @@ public class Node {
 
     public void setTripTime(long tripTime) {
         this.tripTime = tripTime;
+    }
+
+    public boolean getMe() {
+        return me;
+    }
+
+    public void setMe() {
+        me = true;
     }
 
     public static Map<String, Node> getCluster() {
@@ -65,5 +76,16 @@ public class Node {
 
     public static Node getNode(String name) {
         return cluster.get(name);
+    }
+
+    public static Node getCurrentNode() {
+        Node found = null;
+        for (Node node : cluster.values()) {
+            if (node.me) {
+                found = node;
+                break;
+            }
+        }
+        return found;
     }
 }

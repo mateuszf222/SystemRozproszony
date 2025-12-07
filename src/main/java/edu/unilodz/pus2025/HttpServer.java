@@ -79,7 +79,7 @@ public class HttpServer {
                     Node target = Node.getCluster().get(node);
                     if(target == null) throw new JSONException("No such target node");
                     try (Socket targetSocket = new Socket()) {
-                        targetSocket.connect(target.getAddress());
+                        targetSocket.connect(target.address);
                         PrintWriter targetOutput = new PrintWriter(targetSocket.getOutputStream());
                         targetOutput.println(body);
                         targetOutput.flush();

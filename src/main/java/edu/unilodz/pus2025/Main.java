@@ -33,7 +33,7 @@ public class Main {
     }
 
     private static final int PORT = config.port;
-    private static final int HTTPPORT = config.httpport;
+    private static final int HTTPPORT = config.httpPort;
 
     public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException {
         Logger.getLogger("org.jline").setLevel(java.util.logging.Level.OFF);

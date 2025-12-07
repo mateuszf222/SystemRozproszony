@@ -48,7 +48,7 @@ public class CommandPrompt {
                             JSONArray lastExecutions = Database.getLastExecutions(limit);
                             terminal.writer().println(lastExecutions.toString(2));
                             terminal.writer().flush();
-                        }
+                        } break;
                     case "exec": {
                             if(params.length > 2) {
                                 String xCmd = params[1];

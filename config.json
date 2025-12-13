@@ -6,12 +6,6 @@
       "me": true,
       "name": "node-0",
       "address": "localhost:9000"
-    }, {
-      "name": "node-1",
-      "address": "localhost:9001"
-    }, {
-      "name": "node-2",
-      "address": "localhost:9002"
     }
   ]
 }

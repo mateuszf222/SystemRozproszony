@@ -6,12 +6,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Iterator;
 import java.io.IOException;
 import java.sql.SQLException;
 
 import static edu.unilodz.pus2025.Main.getConfig;
 import static edu.unilodz.pus2025.Main.getCurrentNode;
-
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 public class CommandPrompt {
 
     public static void start() {
@@ -69,6 +73,43 @@ public class CommandPrompt {
                                 terminal.writer().println("Use exec cmd arg_json");
                                 terminal.writer().flush();
                             }
+                        }
+                        break;
+                    case "join":
+                        if (params.length < 2) {
+                            terminal.writer().println("Use join <apiUrl>");
+                            terminal.writer().flush();
+                            break;
+                        }
+
+                        try {
+                            HttpClient client = HttpClient.newHttpClient();
+                            HttpRequest request = HttpRequest.newBuilder()
+                                    .uri(URI.create(params[1])).GET().build();
+                            HttpResponse<String> response = client.send(
+                                    request,
+                                    HttpResponse.BodyHandlers.ofString()
+                            );
+                            if (response.statusCode() != 200) throw new Exception("No valid response");
+                            JSONObject root = new JSONObject(response.body());
+                            boolean nodeAdded = false;
+                            for (Iterator<String> it = root.keys(); it.hasNext(); ) {
+                                String key = it.next();
+                                JSONObject node = root.getJSONObject(key);
+
+                                if (node.optBoolean("me", false)) {
+                                    String address = node.optString("address", null);
+                                    if(address == null) throw new Exception("no node address defined");
+                                    new Node(key, address);
+                                    Heartbeat.perform(true);
+                                    nodeAdded = true;
+                                    break;
+                                }
+                            }
+                            if(!nodeAdded) throw new Exception("no node added");
+                        } catch (Exception e) {
+                            terminal.writer().println(e.getMessage());
+                            terminal.writer().flush();
                         }
                         break;
                     default:

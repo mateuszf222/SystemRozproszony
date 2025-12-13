@@ -12,7 +12,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>8</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
         <exec.mainClass>edu.unilodz.pus2025.Main</exec.mainClass>
     </properties>
 
@@ -52,6 +52,8 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>${maven.compiler.release}</release>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
 

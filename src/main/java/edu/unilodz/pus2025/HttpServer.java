@@ -43,7 +43,7 @@ public class HttpServer {
 
     private static void handlePostApi(Context ctx) {
         JSONObject req, res;
-        String body = null;
+        String body;
 
         try {
             body = ctx.body();
@@ -64,7 +64,7 @@ public class HttpServer {
             String cmd = req.getString("cmd");
             if(cmd != null && !cmd.isEmpty()) {
                 String node = req.getString("node");
-                String whoami = getConfig().getString("name");
+                String whoami = getConfig().getName();
                 try {
                     req.getJSONObject("args");
                 } catch(JSONException e) {
@@ -81,6 +81,7 @@ public class HttpServer {
                     try (Socket targetSocket = new Socket()) {
                         targetSocket.connect(target.address);
                         PrintWriter targetOutput = new PrintWriter(targetSocket.getOutputStream());
+                        Database.communicationLog(System.currentTimeMillis(), false, body, target.toString());
                         targetOutput.println(body);
                         targetOutput.flush();
                         result.put("node", node);

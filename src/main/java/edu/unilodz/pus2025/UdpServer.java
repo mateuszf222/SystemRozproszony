@@ -33,7 +33,6 @@ public class UdpServer implements Runnable {
                 Node node = Node.getNode(nodeName);
                 if(node == null) {
                     // new candidate!
-                    System.out.println(payload);
                     String address = payload.getString("address");
                     node = new Node(nodeName, address);
                     log.log(Level.INFO, "New candidate for cluster {0} at {1}", new Object[]{ nodeName, address });

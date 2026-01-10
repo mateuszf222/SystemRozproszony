@@ -1,5 +1,8 @@
 package edu.unilodz.pus2025;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.net.InetSocketAddress;
 import java.util.TreeMap;
 import java.util.Map;
@@ -13,12 +16,14 @@ public class Node {
     private long tripTime = 0;
     private int tasks = 0;
     private boolean me = false;
+    private String name;
     public Node(String name, String address) {
         String[] parts = address.split(":");
         if(parts.length != 2) {
             throw new RuntimeException("wrong node address");
         }
         this.address = new InetSocketAddress(parts[0], Integer.parseInt(parts[1]));
+        this.name = name;
         cluster.put(name, this);
     }
 
@@ -87,5 +92,12 @@ public class Node {
             }
         }
         return found;
+    }
+
+    public String toString() {
+        JSONObject obj = new JSONObject();
+        obj.put("name", name);
+        obj.put("address", getAddress());
+        return obj.toString();
     }
 }

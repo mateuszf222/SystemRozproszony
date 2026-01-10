@@ -37,8 +37,7 @@ public class Database {
             "CREATE TABLE IF NOT EXISTS communication_log (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "timestamp INTEGER," +
-                "session TEXT," +
-                "processing_time INTEGER," +
+                "incoming BOOLEAN," +
                 "request TEXT," +
                 "response TEXT" +
             ")";
@@ -67,28 +66,37 @@ public class Database {
         return db.getMetaData().getURL();
     }
 
-    public static void communicationLog(long time, String session, long processing_time, String request, String response) throws SQLException {
-        String insertSql = "INSERT INTO communication_log(timestamp, session, processing_time, request, response) VALUES(?, ?, ?, ?, ?)";
+    public static void communicationLog(long time, boolean incoming, String request, String response) throws SQLException {
+        String insertSql = "INSERT INTO communication_log(timestamp, incoming, request, response) VALUES(?, ?, ?, ?)";
         try (PreparedStatement pstmt = db.prepareStatement(insertSql)) {
             pstmt.setLong(1, time);
-            pstmt.setString(2, session);
-            pstmt.setLong(3, processing_time);
-            pstmt.setString(4, request);
-            pstmt.setString(5, response);
+            pstmt.setBoolean(2, incoming);
+            pstmt.setString(3, request);
+            pstmt.setString(4, response);
             pstmt.executeUpdate();
+            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+            if(generatedKeys.next()) {
+                long id = generatedKeys.getLong(1);
+                log.log(Level.INFO, "communication_log id {0}, request {1}", new Object[]{ id, request });
+            }
         }
     }
 
     public static void executionLog(String cmd, String args, long execution_time, int code, String description) throws SQLException {
         String insertSql = "INSERT INTO execution_log(timestamp, cmd, args, execution_time, code, description) VALUES(?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = db.prepareStatement(insertSql)) {
-            pstmt.setLong(1, System.currentTimeMillis());
+            pstmt.setLong(1, execution_time);
             pstmt.setString(2, cmd);
             pstmt.setString(3, args);
             pstmt.setLong(4, execution_time);
             pstmt.setInt(5, code);
             pstmt.setString(6, description);
             pstmt.executeUpdate();
+            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+            if(generatedKeys.next()) {
+                long id = generatedKeys.getLong(1);
+                log.log(Level.INFO, "executor: execution_log id {0}, time spent {1} ms", new Object[]{ id, execution_time });
+            }
         }
     }
 
@@ -102,6 +110,7 @@ public class Database {
                 while (rs.next()) {
                     JSONObject obj = new JSONObject();
                     obj.put("id", rs.getInt("id"));
+                    obj.put("incoming", rs.getBoolean("incoming"));
                     obj.put("timestamp", rs.getLong("timestamp"));
                     obj.put("cmd", rs.getString("cmd"));
                     obj.put("args", new JSONObject(rs.getString("args")));

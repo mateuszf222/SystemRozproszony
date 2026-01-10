@@ -28,6 +28,7 @@ public class Executor implements Runnable {
             switch (cmd) {
                 case "sleep": {
                     long ms = args.getLong("ms");
+                    log.log(Level.INFO, "executor: sleep {0}", ms);
                     try {
                         Thread.sleep(ms);
                     } catch (InterruptedException ignored) {
@@ -57,13 +58,14 @@ public class Executor implements Runnable {
         Node node = Node.getCluster().get(response.getString("node"));
         new Thread(new Executor(node, response)).start();
         // end of processing
+        System.out.println(inputLine);
         long processingTime = System.currentTimeMillis() - timeStart;
         JSONObject processed = new JSONObject();
         processed.put("session", uuid);
         processed.put("processing_time", processingTime);
         response.put("processed", processed);
         try {
-            Database.communicationLog(timeStart, uuid, processingTime, inputLine, response.toString());
+            Database.communicationLog(timeStart, true, inputLine, response.toString());
         } catch(SQLException ex) {
             log.log(Level.SEVERE, "Error while logging communication: {0}", ex.getMessage());
         }

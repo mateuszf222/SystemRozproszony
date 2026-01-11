@@ -16,7 +16,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.logging.Level;
+
 public class CommandPrompt {
+    private static final Log log = Log.get();
 
     public static void start() {
         try {
@@ -84,12 +87,8 @@ public class CommandPrompt {
 
                         try {
                             HttpClient client = HttpClient.newHttpClient();
-                            HttpRequest request = HttpRequest.newBuilder()
-                                    .uri(URI.create(params[1])).GET().build();
-                            HttpResponse<String> response = client.send(
-                                    request,
-                                    HttpResponse.BodyHandlers.ofString()
-                            );
+                            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(params[1])).GET().build();
+                            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                             if (response.statusCode() != 200) throw new Exception("No valid response");
                             JSONObject root = new JSONObject(response.body());
                             boolean nodeAdded = false;
@@ -117,6 +116,12 @@ public class CommandPrompt {
                         terminal.writer().flush();
                 }
             } while (running);
-        } catch(IOException | UserInterruptException | EndOfFileException | SQLException ignored) {}
+        } catch(IOException | UserInterruptException | EndOfFileException | SQLException e) {
+            if(e instanceof UserInterruptException || e instanceof EndOfFileException) {
+                System.out.println("Interrupted");
+            } else {
+                log.log(Level.SEVERE, "{0} {1}", new Object[]{e.getClass().getSimpleName(), e.getMessage()});
+            }
+        }
     }
 }

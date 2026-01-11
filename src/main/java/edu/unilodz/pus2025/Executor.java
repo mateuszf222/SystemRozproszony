@@ -22,20 +22,19 @@ public class Executor implements Runnable {
             String cmd = task.getString("cmd");
             JSONObject args = task.getJSONObject("args");
             String argsStr = args.toString();
-            int code = -1;
+            int code;
             String description = "no cmd in task";
             long executionTime = System.currentTimeMillis();
             switch (cmd) {
                 case "sleep": {
-                    long ms = args.getLong("ms");
-                    log.log(Level.INFO, "executor: sleep {0}", ms);
-                    try {
-                        Thread.sleep(ms);
-                    } catch (InterruptedException ignored) {
+                        long ms = args.getLong("ms");
+                        log.log(Level.INFO, "executor: sleep {0}", ms);
+                        try {
+                            Thread.sleep(ms);
+                        } catch (InterruptedException ignored) {}
                     }
-                }
-                code = 0;
-                break;
+                    code = 0;
+                    break;
                 default:
                     log.log(Level.SEVERE, "Cannot execute the task {0}", task);
                     code = -2;
@@ -53,19 +52,14 @@ public class Executor implements Runnable {
 
     public static JSONObject process(String uuid, String inputLine) {
         JSONObject response = new JSONObject(inputLine);
-        long timeStart = System.currentTimeMillis();
-        // processing
         Node node = Node.getCluster().get(response.getString("node"));
         new Thread(new Executor(node, response)).start();
-        // end of processing
-        System.out.println(inputLine);
-        long processingTime = System.currentTimeMillis() - timeStart;
-        JSONObject processed = new JSONObject();
-        processed.put("session", uuid);
-        processed.put("processing_time", processingTime);
-        response.put("processed", processed);
+        JSONObject processing = new JSONObject();
+        processing.put("session", uuid);
+        processing.put("node", node.toString());
+        response.put("processing", processing);
         try {
-            Database.communicationLog(timeStart, true, inputLine, response.toString());
+            Database.communicationLog(System.currentTimeMillis(), true, inputLine, response.toString());
         } catch(SQLException ex) {
             log.log(Level.SEVERE, "Error while logging communication: {0}", ex.getMessage());
         }

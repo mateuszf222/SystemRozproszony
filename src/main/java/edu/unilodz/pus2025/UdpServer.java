@@ -10,7 +10,6 @@ import java.net.SocketException;
 import java.util.Map;
 import java.util.logging.Level;
 
-import static edu.unilodz.pus2025.Main.getCurrentNode;
 import static edu.unilodz.pus2025.Main.getHttpServer;
 
 public class UdpServer implements Runnable {
@@ -46,6 +45,7 @@ public class UdpServer implements Runnable {
                             JSONObject nodeObj = newCluster.getJSONObject(key);
                             String address = nodeObj.optString("address");
                             new Node(key, address);
+                            Heartbeat.perform(true);
                             log.log(Level.INFO, "New node added to cluster {0} at {1}", new Object[]{ key, address });
                         }
                     }

@@ -85,7 +85,7 @@ public class Database {
     public static void executionLog(String cmd, String args, long execution_time, int code, String description) throws SQLException {
         String insertSql = "INSERT INTO execution_log(timestamp, cmd, args, execution_time, code, description) VALUES(?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = db.prepareStatement(insertSql)) {
-            pstmt.setLong(1, execution_time);
+            pstmt.setLong(1, System.currentTimeMillis());
             pstmt.setString(2, cmd);
             pstmt.setString(3, args);
             pstmt.setLong(4, execution_time);
@@ -110,7 +110,6 @@ public class Database {
                 while (rs.next()) {
                     JSONObject obj = new JSONObject();
                     obj.put("id", rs.getInt("id"));
-                    obj.put("incoming", rs.getBoolean("incoming"));
                     obj.put("timestamp", rs.getLong("timestamp"));
                     obj.put("cmd", rs.getString("cmd"));
                     obj.put("args", new JSONObject(rs.getString("args")));

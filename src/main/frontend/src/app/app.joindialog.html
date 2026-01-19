@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>Join Cluster</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="form-container">
+    <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Target URL</mat-label>
+        <input matInput formControlName="url" placeholder="http://host:port/api">
+        <mat-error *ngIf="form.get('url')?.hasError('required')">URL is required</mat-error>
+    </mat-form-field>
+  </form>
+  <div *ngIf="response" class="response">
+    <h3>Response:</h3>
+    <pre>{{ response }}</pre>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" (click)="onJoin()" [disabled]="!form.valid">Join</button>
+</mat-dialog-actions>

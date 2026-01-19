@@ -23,3 +23,9 @@ Thumbs.db
 *.bak
 
 /data
+
+repomix-output.txt
+node0
+node1
+node2
+info.txt

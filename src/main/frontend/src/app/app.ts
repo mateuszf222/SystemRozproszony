@@ -3,17 +3,19 @@ import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 import { Subscription } from 'rxjs';
 
 import { AppService } from './app.service';
 import { ApiDialog } from './app.apidialog';
+import { JoinDialog } from './app.joindialog';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
   standalone: true,
-  imports: [CommonModule, MatToolbarModule, MatTableModule, MatDialogModule]
+  imports: [CommonModule, MatToolbarModule, MatTableModule, MatDialogModule, MatButtonModule]
 })
 export class App {
   protected title = 'PUS2025';
@@ -51,6 +53,12 @@ export class App {
     this.dialog.open(ApiDialog, {
       width: '50%',
       data: { row }
+    });
+  }
+
+  openJoinDialog() {
+    this.dialog.open(JoinDialog, {
+      width: '400px'
     });
   }
 }

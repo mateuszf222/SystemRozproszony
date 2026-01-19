@@ -1,5 +1,7 @@
 <mat-toolbar color="primary">
   <span>{{ title }}</span>
+  <span style="flex: 1 1 auto;"></span>
+  <button mat-button (click)="openJoinDialog()">Join Cluster</button>
 </mat-toolbar>
 
 <mat-table [dataSource]="cluster" class="mat-elevation-z2 mat-compact-table mat-mdc-table">

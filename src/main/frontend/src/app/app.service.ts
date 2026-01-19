@@ -23,6 +23,10 @@ export class AppService {
     return this.http.post('/api', request);
   }
 
+  join(url: string) {
+    return this.http.put('/api', { url }, { responseType: 'text' });
+  }
+
   connect(): void {
     this.ws = new WebSocket('/ws');
 

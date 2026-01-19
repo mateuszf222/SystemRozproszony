@@ -14,6 +14,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
 import static edu.unilodz.pus2025.Main.getConfig;
 import static edu.unilodz.pus2025.Main.getCurrentNode;
 
@@ -41,6 +46,7 @@ public class HttpServer {
         ctx.result(res.toString());
     }
 
+    // Obsługa zwykłych zadań (exec, sleep)
     private static void handlePostApi(Context ctx) {
         JSONObject req, res;
         String body;
@@ -50,8 +56,8 @@ public class HttpServer {
             req = new JSONObject(body);
         } catch (JSONException e) {
             JSONObject error = new JSONObject()
-                .put("error", "Invalid JSON payload")
-                .put("message", e.getMessage());
+                    .put("error", "Invalid JSON payload")
+                    .put("message", e.getMessage());
             ctx.status(400);
             ctx.contentType("application/json");
             ctx.result(error.toString());
@@ -105,11 +111,63 @@ public class HttpServer {
         ctx.result(res.toString());
     }
 
-    public void start() {
-        Javalin app = Javalin.create(config -> config.staticFiles.add("/frontend/browser"));
+    // --- ZMIANA: Obsługa PUT /api (Join logic) ---
+    private static void handlePutApi(Context ctx) {
+        try {
+            JSONObject body = new JSONObject(ctx.body());
 
-        app.get("/api", HttpServer::handleGetApi);
-        app.post("/api", HttpServer::handlePostApi);
+            // Oczekujemy payloadu: { "url": "http://target:port/api" }
+            if (!body.has("url")) {
+                ctx.status(400).result("Missing 'url' field in payload");
+                return;
+            }
+
+            String targetUrl = body.getString("url");
+
+            // 1. Pobieramy config zdalnego węzła
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(targetUrl))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            JSONObject root = new JSONObject(response.body());
+
+            // 2. Dodajemy do klastra
+            for (String key : root.keySet()) {
+                JSONObject nodeJson = root.getJSONObject(key);
+                if (nodeJson.optBoolean("me", false)) {
+                    String address = nodeJson.optString("address", null);
+                    if (address != null) {
+                        new Node(key, address);
+                        log.log(Level.INFO, "Joined cluster via PUT: " + key);
+                    }
+                }
+            }
+
+            // 3. Wymuszamy UDP
+            Heartbeat.perform(true);
+
+            ctx.result("Joined successfully via PUT");
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "PUT Join error: " + e.getMessage());
+            ctx.status(500).result("Error: " + e.getMessage());
+        }
+    }
+
+    public void start() {
+        Javalin app = Javalin.create(config -> {
+            config.staticFiles.add("/frontend/browser");
+        });
+
+        // REJESTRACJA ENDPOINTÓW
+        app.get("/api", HttpServer::handleGetApi);   // Pobranie listy
+        app.post("/api", HttpServer::handlePostApi); // Wykonywanie zadań (exec)
+
+        // ZMIANA: Zamiast POST /join, mamy PUT /api
+        app.put("/api", HttpServer::handlePutApi);   // Dołączanie do sieci (join)
+
         app.start(port);
 
         app.ws("/ws", ws -> {

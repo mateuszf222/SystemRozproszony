@@ -27,6 +27,14 @@ export class AppService {
     return this.http.put('/api', { url }, { responseType: 'text' });
   }
 
+  getExecutionLogs(): Observable<any[]> {
+    return this.http.get<any[]>('/api/logs/execution');
+  }
+
+  getCommunicationLogs(): Observable<any[]> {
+    return this.http.get<any[]>('/api/logs/communication');
+  }
+
   connect(): void {
     this.ws = new WebSocket('/ws');
 

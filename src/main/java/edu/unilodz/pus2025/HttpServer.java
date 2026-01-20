@@ -1,6 +1,7 @@
 package edu.unilodz.pus2025;
 
 import io.javalin.websocket.WsContext;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import io.javalin.Javalin;
@@ -9,9 +10,11 @@ import io.javalin.http.Context;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import java.util.logging.Level;
 
 import java.net.URI;
@@ -156,6 +159,28 @@ public class HttpServer {
         }
     }
 
+    private static void handleGetExecutionLogs(Context ctx) {
+        try {
+            JSONArray logs = Database.getLastExecutions();
+            ctx.contentType("application/json");
+            ctx.result(logs.toString());
+        } catch (SQLException e) {
+            log.log(Level.SEVERE, "DB Error: " + e.getMessage());
+            ctx.status(500).result("Database error");
+        }
+    }
+
+    private static void handleGetCommunicationLogs(Context ctx) {
+        try {
+            JSONArray logs = Database.getLastCommunications();
+            ctx.contentType("application/json");
+            ctx.result(logs.toString());
+        } catch (SQLException e) {
+            log.log(Level.SEVERE, "DB Error: " + e.getMessage());
+            ctx.status(500).result("Database error");
+        }
+    }
+
     public void start() {
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/frontend/browser");
@@ -167,6 +192,10 @@ public class HttpServer {
 
         // ZMIANA: Zamiast POST /join, mamy PUT /api
         app.put("/api", HttpServer::handlePutApi);   // Dołączanie do sieci (join)
+
+        // Nowe endpointy logów
+        app.get("/api/logs/execution", HttpServer::handleGetExecutionLogs);
+        app.get("/api/logs/communication", HttpServer::handleGetCommunicationLogs);
 
         app.start(port);
 

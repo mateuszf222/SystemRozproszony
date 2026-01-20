@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 import { AppService } from './app.service';
 import { ApiDialog } from './app.apidialog';
 import { JoinDialog } from './app.joindialog';
+import { LogsDialog } from './app.logsdialog';
 
 @Component({
   selector: 'app-root',
@@ -59,6 +60,13 @@ export class App {
   openJoinDialog() {
     this.dialog.open(JoinDialog, {
       width: '400px'
+    });
+  }
+
+  openLogsDialog() {
+    this.dialog.open(LogsDialog, {
+      width: '80%',
+      height: '70%'
     });
   }
 }

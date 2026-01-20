@@ -100,12 +100,20 @@ public class Database {
         }
     }
 
+    public static JSONArray getLastExecutions() throws SQLException {
+        return getLastExecutions(-1);
+    }
+
     public static JSONArray getLastExecutions(int limit) throws SQLException {
         JSONArray arr = new JSONArray();
-        String selectSql = "SELECT * FROM execution_log ORDER BY timestamp DESC LIMIT ?";
+        String selectSql = "SELECT * FROM execution_log ORDER BY timestamp DESC";
+        if (limit > 0) {
+            selectSql += " LIMIT ?";
+        }
         try (PreparedStatement pstmt = db.prepareStatement(selectSql)) {
-            pstmt.setInt(1, limit);
-
+            if (limit > 0) {
+                pstmt.setInt(1, limit);
+            }
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     JSONObject obj = new JSONObject();
@@ -116,6 +124,25 @@ public class Database {
                     obj.put("execution_time", rs.getLong("execution_time"));
                     obj.put("code", rs.getLong("code"));
                     obj.put("description", rs.getString("description"));
+                    arr.put(obj);
+                }
+            }
+        }
+        return arr;
+    }
+
+    public static JSONArray getLastCommunications() throws SQLException {
+        JSONArray arr = new JSONArray();
+        String selectSql = "SELECT * FROM communication_log ORDER BY timestamp DESC";
+        try (PreparedStatement pstmt = db.prepareStatement(selectSql)) {
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    JSONObject obj = new JSONObject();
+                    obj.put("id", rs.getInt("id"));
+                    obj.put("timestamp", rs.getLong("timestamp"));
+                    obj.put("incoming", rs.getBoolean("incoming"));
+                    obj.put("request", rs.getString("request"));
+                    obj.put("response", rs.getString("response"));
                     arr.put(obj);
                 }
             }

@@ -1,0 +1,23 @@
+.logs-container {
+    width: 100%;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+table {
+    min-width: 800px;
+    table-layout: fixed;
+}
+
+.clickable-row:hover {
+    background-color: whitesmoke;
+    cursor: pointer;
+}
+
+td.mat-mdc-cell, th.mat-header-cell, td.mat-cell, th.mat-header-cell {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal !important;
+    padding: 8px;
+}

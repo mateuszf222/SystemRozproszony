@@ -1,5 +1,14 @@
 <h2 mat-dialog-title>System Logs</h2>
 <mat-dialog-content class="logs-container">
+    <mat-form-field appearance="fill" style="width: 100%; margin-bottom: 16px;">
+        <mat-label>Select Node</mat-label>
+        <mat-select [(ngModel)]="selectedNode" (selectionChange)="refresh()">
+            <mat-option *ngFor="let node of nodes" [value]="node.node">
+                {{node.node}} <span *ngIf="node.me">(Me)</span>
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
     <mat-tab-group>
         <mat-tab label="Execution Logs">
             <table mat-table [dataSource]="executionLogs" class="mat-elevation-z2">
@@ -45,7 +54,7 @@
                 </ng-container>
                 <ng-container matColumnDef="timestamp">
                     <th mat-header-cell *matHeaderCellDef> Time </th>
-                    <td mat-cell *matCellDef="let log"> {{log.timestamp | date:'HH:mm:ss'}} </td>
+                    <td mat-cell *matCellDef="let log"> {{log.timestamp | date:'yyyy-MM-dd HH:mm:ss'}} </td>
                 </ng-container>
                 <ng-container matColumnDef="type">
                     <th mat-header-cell *matHeaderCellDef> Type </th>

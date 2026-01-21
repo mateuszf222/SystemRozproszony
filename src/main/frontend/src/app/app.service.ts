@@ -27,12 +27,20 @@ export class AppService {
     return this.http.put('/api', { url }, { responseType: 'text' });
   }
 
-  getExecutionLogs(): Observable<any[]> {
-    return this.http.get<any[]>('/api/logs/execution');
+  getExecutionLogs(node?: string): Observable<any[]> {
+    const params: any = {};
+    if (node) {
+        params.node = node;
+    }
+    return this.http.get<any[]>('/api/logs/execution', { params });
   }
 
-  getCommunicationLogs(): Observable<any[]> {
-    return this.http.get<any[]>('/api/logs/communication');
+  getCommunicationLogs(node?: string): Observable<any[]> {
+    const params: any = {};
+    if (node) {
+        params.node = node;
+    }
+    return this.http.get<any[]>('/api/logs/communication', { params });
   }
 
   connect(): void {

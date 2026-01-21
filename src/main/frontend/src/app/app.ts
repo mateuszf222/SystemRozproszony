@@ -66,7 +66,8 @@ export class App {
   openLogsDialog() {
     this.dialog.open(LogsDialog, {
       width: '80%',
-      height: '70%'
+      height: '70%',
+      data: { cluster: this.cluster }
     });
   }
 }

@@ -143,7 +143,11 @@ public class HttpServer {
                 if (nodeJson.optBoolean("me", false)) {
                     String address = nodeJson.optString("address", null);
                     if (address != null) {
-                        new Node(key, address);
+                        Node newNode = new Node(key, address);
+                        String httpAddress = nodeJson.optString("httpAddress", null);
+                        if (httpAddress != null) {
+                            newNode.setHttpAddress(httpAddress);
+                        }
                         log.log(Level.INFO, "Joined cluster via PUT: " + key);
                     }
                 }
@@ -160,24 +164,72 @@ public class HttpServer {
     }
 
     private static void handleGetExecutionLogs(Context ctx) {
-        try {
-            JSONArray logs = Database.getLastExecutions();
-            ctx.contentType("application/json");
-            ctx.result(logs.toString());
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "DB Error: " + e.getMessage());
-            ctx.status(500).result("Database error");
+        String targetNodeName = ctx.queryParam("node");
+        String myName = getConfig().getName();
+
+        if (targetNodeName == null || targetNodeName.isEmpty() || targetNodeName.equals(myName)) {
+            try {
+                JSONArray logs = Database.getLastExecutions();
+                ctx.contentType("application/json");
+                ctx.result(logs.toString());
+            } catch (SQLException e) {
+                log.log(Level.SEVERE, "DB Error: " + e.getMessage());
+                ctx.status(500).result("Database error");
+            }
+        } else {
+            Node target = Node.getCluster().get(targetNodeName);
+            if (target == null) {
+                ctx.status(404).result("Node not found");
+                return;
+            }
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(target.getHttpAddress() + "/api/logs/execution"))
+                        .GET()
+                        .build();
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                ctx.contentType("application/json");
+                ctx.result(response.body());
+            } catch (Exception e) {
+                log.log(Level.SEVERE, "Proxy Error: " + e.getMessage());
+                ctx.status(500).result("Proxy error: " + e.getMessage());
+            }
         }
     }
 
     private static void handleGetCommunicationLogs(Context ctx) {
-        try {
-            JSONArray logs = Database.getLastCommunications();
-            ctx.contentType("application/json");
-            ctx.result(logs.toString());
-        } catch (SQLException e) {
-            log.log(Level.SEVERE, "DB Error: " + e.getMessage());
-            ctx.status(500).result("Database error");
+        String targetNodeName = ctx.queryParam("node");
+        String myName = getConfig().getName();
+
+        if (targetNodeName == null || targetNodeName.isEmpty() || targetNodeName.equals(myName)) {
+            try {
+                JSONArray logs = Database.getLastCommunications();
+                ctx.contentType("application/json");
+                ctx.result(logs.toString());
+            } catch (SQLException e) {
+                log.log(Level.SEVERE, "DB Error: " + e.getMessage());
+                ctx.status(500).result("Database error");
+            }
+        } else {
+            Node target = Node.getCluster().get(targetNodeName);
+            if (target == null) {
+                ctx.status(404).result("Node not found");
+                return;
+            }
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(target.getHttpAddress() + "/api/logs/communication"))
+                        .GET()
+                        .build();
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                ctx.contentType("application/json");
+                ctx.result(response.body());
+            } catch (Exception e) {
+                log.log(Level.SEVERE, "Proxy Error: " + e.getMessage());
+                ctx.status(500).result("Proxy error: " + e.getMessage());
+            }
         }
     }
 

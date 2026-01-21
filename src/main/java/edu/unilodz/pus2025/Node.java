@@ -12,6 +12,7 @@ import static edu.unilodz.pus2025.Main.*;
 public class Node {
     private static final Map<String, Node> cluster = new TreeMap<>();
     public final InetSocketAddress address;
+    private String httpAddress;
     private long lastBeat = 0;
     private long tripTime = 0;
     private int tasks = 0;
@@ -24,11 +25,20 @@ public class Node {
         }
         this.address = new InetSocketAddress(parts[0], Integer.parseInt(parts[1]));
         this.name = name;
+        this.httpAddress = "http://" + this.address.getHostString() + ":8080"; // Default fallback
         cluster.put(name, this);
     }
 
     public String getAddress() {
         return address.getHostString() + ":" + address.getPort();
+    }
+
+    public String getHttpAddress() {
+        return httpAddress;
+    }
+
+    public void setHttpAddress(String httpAddress) {
+        this.httpAddress = httpAddress;
     }
 
     public long getLastBeat() {
@@ -98,6 +108,7 @@ public class Node {
         JSONObject obj = new JSONObject();
         obj.put("name", name);
         obj.put("address", getAddress());
+        obj.put("httpAddress", httpAddress);
         return obj.toString();
     }
 }

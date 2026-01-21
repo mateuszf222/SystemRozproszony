@@ -23,6 +23,12 @@ public class Config extends JSONObject {
                 String name = jNode.getString("name");
                 String address = jNode.getString("address");
                 Node node = new Node(name, address);
+                
+                String httpAddress = jNode.optString("httpAddress", null);
+                if (httpAddress != null) {
+                    node.setHttpAddress(httpAddress);
+                }
+
                 boolean me = false;
                 try {
                     me = jNode.getBoolean("me");
@@ -39,6 +45,9 @@ public class Config extends JSONObject {
                             throw new RuntimeException("cannot determine a port for the node");
                         }
                         this.port = Integer.parseInt(parts[1]);
+                        
+                        // Set correct http address for me
+                        node.setHttpAddress("http://" + parts[0] + ":" + this.httpPort);
                     }
                 } catch(Exception ignored) {}
             }

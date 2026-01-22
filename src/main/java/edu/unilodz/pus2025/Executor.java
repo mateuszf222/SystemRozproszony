@@ -52,7 +52,13 @@ public class Executor implements Runnable {
 
     public static JSONObject process(String uuid, String inputLine) {
         JSONObject response = new JSONObject(inputLine);
-        Node node = Node.getCluster().get(response.getString("node"));
+        String nodeName = response.getString("node");
+        Node node = Node.getCluster().get(nodeName);
+        if (node == null) {
+            log.log(Level.SEVERE, "Executor.process: Node {0} not found in cluster", nodeName);
+            response.put("error", "Node not found: " + nodeName);
+            return response;
+        }
         new Thread(new Executor(node, response)).start();
         JSONObject processing = new JSONObject();
         processing.put("session", uuid);

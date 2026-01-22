@@ -95,6 +95,7 @@ public class HttpServer {
                     result.put("node", whoami);
                     result.put("queued", true);
                     res.put("result", result);
+                    Database.communicationLog(System.currentTimeMillis(), true, req.toString(), res.toString());
                     new Thread(new Executor(getCurrentNode(), req)).start();
                 } else {
                     Node target = Node.getCluster().get(node);
@@ -169,7 +170,9 @@ public class HttpServer {
             // 3. Wymuszamy UDP
             Heartbeat.perform(true);
 
-            ctx.result("Joined successfully via PUT");
+            String responseMsg = "Joined successfully via PUT";
+            Database.communicationLog(System.currentTimeMillis(), true, ctx.body(), responseMsg);
+            ctx.result(responseMsg);
         } catch (Exception e) {
             log.log(Level.SEVERE, "PUT Join error: " + e.getMessage());
             ctx.status(500).result("Error: " + e.getMessage());

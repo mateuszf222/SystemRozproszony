@@ -43,6 +43,24 @@ export class AppService {
     return this.http.get<any[]>('/api/logs/communication', { params });
   }
 
+  getFiles(): Observable<any[]> {
+    return this.http.get<any[]>('/api/files');
+  }
+
+  uploadFile(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post('/api/files', formData, { responseType: 'text' });
+  }
+
+  downloadFile(filename: string): void {
+      window.open('/api/files/' + filename, '_blank');
+  }
+
+  transferFile(filename: string, targetNode: string): Observable<any> {
+      return this.http.post('/api/files/transfer', { filename, targetNode }, { responseType: 'text' });
+  }
+
   connect(): void {
     this.ws = new WebSocket('/ws');
 

@@ -32,11 +32,12 @@ public class Heartbeat implements Runnable {
         String myName = getConfig().getName();
         payload.put("name", myName);
         payload.put("address", getConfig().getAddress());
+        payload.put("httpAddress", getCurrentNode().getHttpAddress()); // Add this
         long timestamp = System.currentTimeMillis();
         payload.put("timestamp", timestamp);
         payload.put("tasks", getCurrentNode().getTasks());
         if(withCluster) {
-            payload.put("cluster", Node.getCluster());
+            payload.put("cluster", Node.getClusterJson());
         }
         byte[] payloadBinary = payload.toString().getBytes();
         for (Map.Entry<String, Node> nodeEntry: Node.getCluster().entrySet()) {

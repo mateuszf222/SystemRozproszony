@@ -118,11 +118,27 @@ public class Node {
         return bestNode != null ? bestNode.name : null;
     }
 
-    public String toString() {
+    public JSONObject toJSON() {
         JSONObject obj = new JSONObject();
         obj.put("name", name);
         obj.put("address", getAddress());
         obj.put("httpAddress", httpAddress);
-        return obj.toString();
+        obj.put("tasks", tasks);
+        obj.put("lastBeat", lastBeat);
+        obj.put("tripTime", tripTime);
+        obj.put("me", me);
+        return obj;
+    }
+
+    public static JSONObject getClusterJson() {
+        JSONObject json = new JSONObject();
+        for (Node node : cluster.values()) {
+            json.put(node.name, node.toJSON());
+        }
+        return json;
+    }
+
+    public String toString() {
+        return toJSON().toString();
     }
 }

@@ -1,6 +1,7 @@
 <mat-toolbar color="primary">
   <span>{{ title }}</span>
   <span style="flex: 1 1 auto;"></span>
+  <button mat-button (click)="openFilesDialog()">Manage Files</button>
   <button mat-button (click)="openLogsDialog()">View Logs</button>
   <button mat-button (click)="openJoinDialog()">Join Cluster</button>
 </mat-toolbar>

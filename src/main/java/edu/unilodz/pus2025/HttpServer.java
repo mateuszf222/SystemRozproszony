@@ -1,5 +1,6 @@
 package edu.unilodz.pus2025;
 
+import io.javalin.http.UploadedFile;
 import io.javalin.websocket.WsContext;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -7,13 +8,20 @@ import org.json.JSONObject;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import java.util.logging.Level;
 
@@ -38,13 +46,13 @@ public class HttpServer {
     public void clusterBroadcast() {
         for (WsContext client: clients) {
             if (client.session.isOpen()) {
-                client.send(new JSONObject(Node.getCluster()).toString());
+                client.send(Node.getClusterJson().toString());
             }
         }
     }
 
     private static void handleGetApi(Context ctx) {
-        JSONObject res = new JSONObject(Node.getCluster());
+        JSONObject res = Node.getClusterJson();
         ctx.contentType("application/json");
         ctx.result(res.toString());
     }
@@ -249,6 +257,127 @@ public class HttpServer {
         }
     }
 
+    private static final String FILES_DIR = "./files";
+
+    private static void initFilesDir() {
+        File folder = new File(FILES_DIR);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+    }
+
+    private static void handleGetFiles(Context ctx) {
+        initFilesDir();
+        JSONArray files = new JSONArray();
+        try (Stream<Path> paths = Files.walk(Paths.get(FILES_DIR))) {
+            paths.filter(Files::isRegularFile)
+                    .forEach(path -> {
+                        JSONObject file = new JSONObject();
+                        file.put("name", path.getFileName().toString());
+                        try {
+                            file.put("size", Files.size(path));
+                        } catch (IOException e) {
+                            file.put("size", -1);
+                        }
+                        files.put(file);
+                    });
+        } catch (IOException e) {
+            log.log(Level.SEVERE, "Error listing files: " + e.getMessage());
+            ctx.status(500).result("Error listing files");
+            return;
+        }
+        ctx.contentType("application/json");
+        ctx.result(files.toString());
+    }
+
+    private static void handlePostFilesUpload(Context ctx) {
+        initFilesDir();
+        UploadedFile uploadedFile = ctx.uploadedFile("file");
+        if (uploadedFile != null) {
+            try {
+                Path targetPath = Paths.get(FILES_DIR, uploadedFile.filename());
+                try (InputStream content = uploadedFile.content()) {
+                    Files.copy(content, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+                ctx.result("File uploaded");
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Upload error: " + e.getMessage());
+                ctx.status(500).result("Upload failed");
+            }
+        } else {
+            ctx.status(400).result("No file uploaded");
+        }
+    }
+
+    private static void handleGetFileDownload(Context ctx) {
+        String filename = ctx.pathParam("filename");
+        Path filePath = Paths.get(FILES_DIR, filename);
+        if (Files.exists(filePath) && !Files.isDirectory(filePath)) {
+            try {
+                ctx.result(Files.newInputStream(filePath));
+                ctx.header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+            } catch (IOException e) {
+                ctx.status(500);
+            }
+        } else {
+            ctx.status(404).result("File not found");
+        }
+    }
+
+    private static void handlePutFileInternal(Context ctx) {
+        initFilesDir();
+        String filename = ctx.pathParam("filename");
+        try {
+            Path targetPath = Paths.get(FILES_DIR, filename);
+            Files.copy(ctx.bodyInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            ctx.result("File received via internal transfer");
+            log.log(Level.INFO, "Received file transfer: " + filename);
+        } catch (IOException e) {
+            log.log(Level.SEVERE, "Internal upload error: " + e.getMessage());
+            ctx.status(500).result("Internal upload failed");
+        }
+    }
+
+    private static void handlePostFilesTransfer(Context ctx) {
+        try {
+            JSONObject body = new JSONObject(ctx.body());
+            String filename = body.getString("filename");
+            String targetNodeName = body.getString("targetNode");
+
+            Path filePath = Paths.get(FILES_DIR, filename);
+            if (!Files.exists(filePath)) {
+                ctx.status(404).result("File not found locally");
+                return;
+            }
+
+            Node target = Node.getCluster().get(targetNodeName);
+            if (target == null) {
+                ctx.status(404).result("Target node not found");
+                return;
+            }
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(target.getHttpAddress() + "/api/files/" + filename))
+                    .PUT(HttpRequest.BodyPublishers.ofFile(filePath))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                ctx.result("Transfer successful");
+                Database.communicationLog(System.currentTimeMillis(), false, "Transfer file " + filename, targetNodeName);
+            } else {
+                ctx.status(500).result("Transfer failed: " + response.body());
+                log.log(Level.SEVERE, "Transfer failed: " + response.body());
+            }
+
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Transfer error: " + e.getMessage());
+            ctx.status(500).result("Transfer error: " + e.getMessage());
+        }
+    }
+
     public void start() {
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/frontend/browser");
@@ -264,6 +393,13 @@ public class HttpServer {
         // Nowe endpointy logów
         app.get("/api/logs/execution", HttpServer::handleGetExecutionLogs);
         app.get("/api/logs/communication", HttpServer::handleGetCommunicationLogs);
+
+        // Files
+        app.get("/api/files", HttpServer::handleGetFiles);
+        app.post("/api/files", HttpServer::handlePostFilesUpload);
+        app.get("/api/files/{filename}", HttpServer::handleGetFileDownload);
+        app.put("/api/files/{filename}", HttpServer::handlePutFileInternal);
+        app.post("/api/files/transfer", HttpServer::handlePostFilesTransfer);
 
         app.start(port);
 

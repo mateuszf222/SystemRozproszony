@@ -10,6 +10,7 @@ import { AppService } from './app.service';
 import { ApiDialog } from './app.apidialog';
 import { JoinDialog } from './app.joindialog';
 import { LogsDialog } from './app.logsdialog';
+import { FilesDialog } from './app.filesdialog';
 
 @Component({
   selector: 'app-root',
@@ -66,6 +67,14 @@ export class App {
   openLogsDialog() {
     this.dialog.open(LogsDialog, {
       width: '80%',
+      height: '70%',
+      data: { cluster: this.cluster }
+    });
+  }
+
+  openFilesDialog() {
+    this.dialog.open(FilesDialog, {
+      width: '70%',
       height: '70%',
       data: { cluster: this.cluster }
     });

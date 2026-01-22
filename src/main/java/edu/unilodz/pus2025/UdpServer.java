@@ -37,6 +37,11 @@ public class UdpServer implements Runnable {
                     log.log(Level.INFO, "New candidate for cluster {0} at {1}", new Object[]{ nodeName, address });
                     Heartbeat.perform(true);
                 }
+                String httpAddress = payload.optString("httpAddress", null);
+                if (httpAddress != null) {
+                    node.setHttpAddress(httpAddress);
+                }
+
                 try {
                     JSONObject newCluster = payload.getJSONObject("cluster");
                     Map<String, Node> currentCluster = Node.getCluster();
@@ -44,7 +49,11 @@ public class UdpServer implements Runnable {
                         if (!currentCluster.containsKey(key)) {
                             JSONObject nodeObj = newCluster.getJSONObject(key);
                             String address = nodeObj.optString("address");
-                            new Node(key, address);
+                            Node newNode = new Node(key, address);
+                            String httpAddr = nodeObj.optString("httpAddress", null);
+                            if (httpAddr != null) {
+                                newNode.setHttpAddress(httpAddr);
+                            }
                             Heartbeat.perform(true);
                             log.log(Level.INFO, "New node added to cluster {0} at {1}", new Object[]{ key, address });
                         }

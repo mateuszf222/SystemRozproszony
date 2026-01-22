@@ -1,6 +1,16 @@
 <form [formGroup]="form" (ngSubmit)="onPerform()">
-  <div class="mat-dialog-title">Perform command on <em>{{ data.row.node }}</em></div>
+  <div class="mat-dialog-title">Perform command</div>
   <div class="mat-dialog-content">
+
+    <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Target Node</mat-label>
+        <mat-select formControlName="node">
+            <mat-option value="auto"><strong>Least Loaded (Auto)</strong></mat-option>
+            <mat-option *ngFor="let node of nodes" [value]="node.node">
+                {{node.node}} <span *ngIf="node.me">(Me)</span>
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
 
     <mat-form-field appearance="outline" class="w-full">
         <mat-label>Command</mat-label>

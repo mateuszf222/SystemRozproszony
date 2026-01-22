@@ -53,7 +53,7 @@ export class App {
   openDialog(row: any) {
     this.dialog.open(ApiDialog, {
       width: '50%',
-      data: { row }
+      data: { row, cluster: this.cluster }
     });
   }
 

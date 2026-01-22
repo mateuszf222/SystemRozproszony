@@ -104,6 +104,20 @@ public class Node {
         return found;
     }
 
+    public static String getLeastLoadedNode() {
+        Node bestNode = null;
+        int minTasks = Integer.MAX_VALUE;
+
+        for (Node node : cluster.values()) {
+            if (node.getTasks() < minTasks) {
+                minTasks = node.getTasks();
+                bestNode = node;
+            }
+        }
+
+        return bestNode != null ? bestNode.name : null;
+    }
+
     public String toString() {
         JSONObject obj = new JSONObject();
         obj.put("name", name);

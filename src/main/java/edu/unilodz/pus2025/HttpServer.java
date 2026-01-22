@@ -73,6 +73,18 @@ public class HttpServer {
             String cmd = req.getString("cmd");
             if(cmd != null && !cmd.isEmpty()) {
                 String node = req.getString("node");
+                
+                // --- ADDED: Auto-selection for least loaded node ---
+                if ("auto".equalsIgnoreCase(node)) {
+                    node = Node.getLeastLoadedNode();
+                    if (node == null) {
+                         // Fallback to self if cluster is empty/broken
+                         node = getConfig().getName();
+                    }
+                    req.put("node", node); // Update request with chosen node
+                }
+                // ---------------------------------------------------
+
                 String whoami = getConfig().getName();
                 try {
                     req.getJSONObject("args");
@@ -90,8 +102,9 @@ public class HttpServer {
                     try (Socket targetSocket = new Socket()) {
                         targetSocket.connect(target.address);
                         PrintWriter targetOutput = new PrintWriter(targetSocket.getOutputStream());
-                        Database.communicationLog(System.currentTimeMillis(), false, body, target.toString());
-                        targetOutput.println(body);
+                        String requestBody = req.toString();
+                        Database.communicationLog(System.currentTimeMillis(), false, requestBody, target.toString());
+                        targetOutput.println(requestBody);
                         targetOutput.flush();
                         result.put("node", node);
                         result.put("queued", true);
